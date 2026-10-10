@@ -109,6 +109,18 @@ scripts/sandbox-probe.sh
 It fails if a Forecast-signed copy gets through anywhere, or if the control can't (which would mean the probe
 is broken).
 
+### Watching the real app
+
+[`scripts/runtime-watch.sh`](scripts/runtime-watch.sh) launches your installed Forecast and watches the app and
+widget processes for a minute: any network connection fails it, and everything they write to the system log is
+kept in a local file. Give it a word from one of your meeting titles and it also fails if that word appears in
+the log or anywhere in Forecast's data, including the widget snapshots macOS keeps. Add a Forecast widget to your
+desktop first so the widget is watched too.
+
+```sh
+scripts/runtime-watch.sh --canary "Standup"
+```
+
 The tests back this up: thousands of random calendars (including daylight-saving days and reversed or
 overlapping times) and hostile titles (a million characters, control characters, injection strings),
 plus a check that nothing the widget hands to macOS contains any text. The build treats every warning

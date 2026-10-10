@@ -25,6 +25,8 @@ struct ForecastWidget: Widget {
 struct ForecastConfiguration: WidgetConfigurationIntent {
     static let title: LocalizedStringResource = "Forecast"
     static let description = IntentDescription("Choose a season, your working hours, and whether breaks count as free time.")
+    /// Only the widget uses this. Keep it out of Shortcuts, Siri and Spotlight, so nothing else can call it.
+    static let isDiscoverable = false
 
     @Parameter(title: "Season", default: .automatic)
     var season: SeasonOption

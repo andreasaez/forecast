@@ -40,9 +40,22 @@ final class CalendarReader {
         guard Self.access == .granted else { return [] }
         let predicate = store.predicateForEvents(withStart: window.start, end: window.end, calendars: nil)
         return store.events(matching: predicate).compactMap { event in
-            guard !event.isAllDay, event.availability != .free, event.status != .canceled else { return nil }
-            if countingBreaksAsFree, BreakMatcher.isBreak(event.title) { return nil }
-            return BusyInterval(start: event.startDate, end: event.endDate)
+            Self.busyInterval(
+                start: event.startDate,
+                end: event.endDate,
+                isAllDay: event.isAllDay,
+                isFree: event.availability == .free,
+                isCancelled: event.status == .canceled,
+                // `&&` short-circuits: with the setting off, the title is never read.
+                isBreak: countingBreaksAsFree && BreakMatcher.isBreak(event.title)
+            )
         }
+    }
+
+    /// Which events count as busy time. Kept free of EventKit types so tests can cover it, including events
+    /// with no start or end (EventKit declares those as never missing, but a corrupt event can lack them).
+    static func busyInterval(start: Date?, end: Date?, isAllDay: Bool, isFree: Bool, isCancelled: Bool, isBreak: Bool) -> BusyInterval? {
+        guard let start, let end, !isAllDay, !isFree, !isCancelled, !isBreak else { return nil }
+        return BusyInterval(start: start, end: end)
     }
 }
