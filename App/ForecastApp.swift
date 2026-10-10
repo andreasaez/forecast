@@ -29,9 +29,11 @@ final class ForecastModel: ObservableObject {
     }
     @Published private(set) var today: DayForecast
     @Published private(set) var outlook: [DayForecast]
+    @Published private(set) var isRequestingAccess = false
 
     let settings = ForecastSettings()
-    private let reader = CalendarReader()
+    /// Created once access is granted: a calendar store made before that can keep returning nothing.
+    private var reader: CalendarReader?
     private var observer: NSObjectProtocol?
 
     init() {
@@ -46,17 +48,32 @@ final class ForecastModel: ObservableObject {
     }
 
     func requestAccess() async {
+        isRequestingAccess = true
+        defer { isRequestingAccess = false }
+        // Also watch for the answer directly, so a reply that never arrives can't leave onboarding stuck.
+        let watcher = Task { @MainActor [weak self] in
+            while !Task.isCancelled, CalendarReader.access == .notDetermined {
+                try? await Task.sleep(for: .milliseconds(400))
+            }
+            self?.refresh()
+        }
         _ = await CalendarReader.requestAccess()
+        watcher.cancel()
         refresh()
     }
 
     func refresh() {
         now = Date()
         access = CalendarReader.access
+        if access == .granted, reader == nil {
+            reader = CalendarReader()
+        }
         // Until access is granted, the onboarding screen shows a made-up day.
-        let intervals = access == .granted
-            ? reader.busyIntervals(in: ForecastEngine.fetchWindow(from: now), countingBreaksAsFree: countBreaksAsFree)
-            : SampleCalendar.intervals(around: now)
+        let intervals = if access == .granted, let reader {
+            reader.busyIntervals(in: ForecastEngine.fetchWindow(from: now), countingBreaksAsFree: countBreaksAsFree)
+        } else {
+            SampleCalendar.intervals(around: now)
+        }
         today = ForecastEngine.forecast(for: now, intervals: intervals, settings: settings)
         outlook = ForecastEngine.outlook(after: now, days: 5, intervals: intervals, settings: settings)
         if access == .granted {

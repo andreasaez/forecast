@@ -34,6 +34,10 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             model.refresh()
         }
+        .onChange(of: model.access) { _, access in
+            // However access was granted (the prompt, or System Settings), move past onboarding.
+            if access == .granted { hasOnboarded = true }
+        }
     }
 }
 
@@ -93,10 +97,13 @@ struct OnboardingView: View {
     private var action: some View {
         switch model.access {
         case .notDetermined:
-            primaryButton("Allow calendar access") {
-                Task {
-                    await model.requestAccess()
-                    if model.access == .granted { onContinue() }
+            HStack(spacing: 12) {
+                primaryButton(model.isRequestingAccess ? "Waiting for permission…" : "Allow calendar access") {
+                    Task { await model.requestAccess() }
+                }
+                .disabled(model.isRequestingAccess)
+                if model.isRequestingAccess {
+                    ProgressView().controlSize(.small)
                 }
             }
         case .denied:

@@ -27,7 +27,11 @@ final class CalendarReader {
     /// Reading event times requires full access; EventKit offers no times-only permission.
     /// Permission covers the whole app, so a short-lived store is enough to ask.
     static func requestAccess() async -> Bool {
-        (try? await EKEventStore().requestFullAccessToEvents()) ?? false
+        let store = EKEventStore()
+        let granted = (try? await store.requestFullAccessToEvents()) ?? false
+        // Keep the store alive until macOS has answered, or the answer can be lost.
+        withExtendedLifetime(store) {}
+        return granted
     }
 
     /// - Parameter countingBreaksAsFree: When on, each title is passed to `BreakMatcher.isBreak`
