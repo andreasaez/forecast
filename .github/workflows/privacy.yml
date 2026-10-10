@@ -19,6 +19,9 @@ jobs:
       - name: Audit source
         run: scripts/privacy-audit.sh
 
+      - name: Live sandbox test
+        run: scripts/sandbox-probe.sh
+
       - name: Run tests
         run: |
           xcodebuild build-for-testing -project Forecast.xcodeproj -scheme Forecast \

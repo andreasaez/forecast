@@ -117,6 +117,24 @@ else
     pass "no networking, web views, scripting, dynamic code loading, file I/O, clipboard or logging"
 fi
 
+# A link handed to the browser is the one way data could leave a sandboxed app, so links are locked down:
+# the only URL allowed is the System Settings privacy page, and it can only be opened one way.
+allowed_url='x-apple.systempreferences:com.apple.preference.security?Privacy_Calendars'
+allowed_open='NSWorkspace.shared.open(SystemSettings.calendarPrivacy)'
+open_calls=$(grep -rnE 'NSWorkspace|openURL|OpenURLAction|(^|[^A-Za-z_])Link[[:space:]]*[({]|LSOpen|NSApp\.open|\.open\(|onOpenURL|handlesExternalEvents' $SOURCES --include='*.swift' || true)
+bad_open=$(printf '%s\n' "$open_calls" | grep -v '^$' | grep -vF "$allowed_open" || true)
+url_literals=$(grep -rhoE 'URL\(string: *"[^"]*"' $SOURCES --include='*.swift' | sed -E 's/URL\(string: *"//; s/"$//' | sort -u)
+bad_urls=$(printf '%s\n' "$url_literals" | grep -v '^$' | grep -vxF "$allowed_url" || true)
+dynamic_urls=$(grep -rnE 'URL\((string|fileURLWithPath|filePath|resolvingAliasFileAt|dataRepresentation):[[:space:]]*[^"[:space:]]|URLComponents|URLQueryItem|appendingPathComponent|appending\((path|component|queryItems)' $SOURCES --include='*.swift' | grep -v '^Tests/' || true)
+if [ -z "$bad_open" ] && [ "$(printf '%s\n' "$open_calls" | grep -c -F "$allowed_open")" -le 1 ] && [ -z "$bad_urls" ] && [ -z "$dynamic_urls" ]; then
+    pass "links: only the System Settings privacy page can be opened, from a fixed address"
+else
+    [ -n "$bad_open" ] && printf '%s\n' "$bad_open"
+    [ -n "$bad_urls" ] && printf '  URL: %s\n' $bad_urls
+    [ -n "$dynamic_urls" ] && printf '%s\n' "$dynamic_urls"
+    fail "links: a URL could be opened or built beyond the allowed System Settings page (above)"
+fi
+
 if find $SOURCES -type f \( -name '*.m' -o -name '*.c' -o -name '*.cpp' -o -name '*.mm' -o -name '*.h' -o -name '*.js' -o -name '*.dylib' -o -name '*.a' -o -name '*.framework' \) | grep -q .; then
     fail "non-Swift code or prebuilt binaries in the source tree"
 else

@@ -113,9 +113,7 @@ struct OnboardingView: View {
                     .foregroundStyle(theme.secondaryInk)
                     .fixedSize(horizontal: false, vertical: true)
                 primaryButton("Open Privacy Settings") {
-                    if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Calendars") {
-                        NSWorkspace.shared.open(url)
-                    }
+                    NSWorkspace.shared.open(SystemSettings.calendarPrivacy)
                 }
             }
         case .granted:
@@ -133,6 +131,12 @@ struct OnboardingView: View {
         .tint(theme.accent)
         .controlSize(.large)
     }
+}
+
+/// The only link Forecast ever opens. scripts/privacy-audit.sh fails on any other way of opening a URL,
+/// because a link handed to the browser is the one route out of the sandbox.
+enum SystemSettings {
+    static let calendarPrivacy = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Calendars")!
 }
 
 // MARK: - Glass

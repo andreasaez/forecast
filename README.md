@@ -87,10 +87,27 @@ It checks that:
 - only one file imports EventKit, and it reads only allowlisted event fields and never writes;
 - the title is used exactly once, as input to the yes/no break check;
 - there's no networking, web view, scripting, dynamic loading, file I/O or logging API anywhere;
+- links are locked down: the only URL the app can open is the System Settings privacy page, from a fixed
+  address, because a link handed to the browser is the one route out of a sandbox;
 - there's no C, Objective-C, JavaScript, prebuilt binaries, dependencies or build scripts;
 - the bundled Inter fonts match the checksums pinned in `Shared/Fonts/Inter.sha256`;
 - no team IDs, certificates, provisioning profiles or email addresses are in the repo;
 - the built app's signature is valid, with hardened runtime on, no debugger entitlement, and no networking frameworks linked.
+
+### The live sandbox test
+
+[`scripts/sandbox-probe.sh`](scripts/sandbox-probe.sh) checks what macOS actually enforces, not just what the
+code says. It builds a small probe three times: unprotected as a control, then signed with Forecast's real app
+and widget entitlements. Each copy tries to open network connections (directly and through a child process),
+read your Documents and the Calendar database, write to the Desktop, run injected code, and send Apple Events to
+Finder. Network traffic only goes to a listener on your own Mac, and nothing prompts you.
+
+```sh
+scripts/sandbox-probe.sh
+```
+
+It fails if a Forecast-signed copy gets through anywhere, or if the control can't (which would mean the probe
+is broken).
 
 The tests back this up: thousands of random calendars (including daylight-saving days and reversed or
 overlapping times) and hostile titles (a million characters, control characters, injection strings),
