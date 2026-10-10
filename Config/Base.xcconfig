@@ -1,0 +1,33 @@
+// Build settings shared by every target.
+// Personal settings (your team ID, your bundle ID prefix) belong in Local.xcconfig,
+// which git ignores. See Local.xcconfig.example.
+
+SDKROOT = macosx
+MACOSX_DEPLOYMENT_TARGET = 14.0
+SWIFT_VERSION = 5.0
+MARKETING_VERSION = 1.0
+CURRENT_PROJECT_VERSION = 1
+COMBINE_HIDPI_IMAGES = YES
+ALWAYS_SEARCH_USER_PATHS = NO
+
+// Any warning or possible data race fails the build.
+SWIFT_TREAT_WARNINGS_AS_ERRORS = YES
+SWIFT_STRICT_CONCURRENCY = complete
+BUNDLE_ID_PREFIX = local
+
+// Signing. "-" signs to run locally with no Apple account. Put a team in Local.xcconfig.
+CODE_SIGN_STYLE = Automatic
+CODE_SIGN_IDENTITY = -
+DEVELOPMENT_TEAM =
+
+// Security. Forecast gets the calendar and nothing else.
+// scripts/privacy-audit.sh checks the signed app to make sure this stays true.
+ENABLE_APP_SANDBOX = YES
+ENABLE_HARDENED_RUNTIME = YES
+ENABLE_OUTGOING_NETWORK_CONNECTIONS = NO
+ENABLE_INCOMING_NETWORK_CONNECTIONS = NO
+ENABLE_RESOURCE_ACCESS_CALENDARS = YES
+ENABLE_USER_SELECTED_FILES =
+ENABLE_USER_SCRIPT_SANDBOXING = YES
+
+#include? "Local.xcconfig"

@@ -1,0 +1,9 @@
+// Copy this file to Config/Local.xcconfig and fill it in.
+// Local.xcconfig is git-ignored, so your team ID never ends up in a commit.
+//
+// You only need this if you want to sign with your own Apple ID
+// (Xcode › Settings › Accounts; a free account works).
+
+DEVELOPMENT_TEAM = YOURTEAMID
+CODE_SIGN_IDENTITY = Apple Development
+BUNDLE_ID_PREFIX = io.github.yourname

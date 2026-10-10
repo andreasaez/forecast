@@ -1,0 +1,18 @@
+# Personal signing settings: never commit
+Config/Local.xcconfig
+
+# Xcode
+xcuserdata/
+*.xcuserstate
+DerivedData/
+build/
+*.xcarchive
+
+# Signing material: never commit
+*.p12
+*.cer
+*.mobileprovision
+*.provisionprofile
+
+# macOS
+.DS_Store
