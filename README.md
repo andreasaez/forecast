@@ -104,6 +104,22 @@ CI runs all of this on every push and pull request.
 You need macOS 14 or later and Xcode 26 or later (free from the App Store). Liquid Glass shows on
 macOS 26; older versions get a frosted fallback. You don't need an Apple developer account.
 
+> **Full Xcode is required. Command Line Tools alone won't work.** Building a widget needs
+> `xcodebuild` and Apple's App Intents tooling, which only ship with the full Xcode app.
+> Check before you start:
+>
+> ```sh
+> xcodebuild -version
+> ```
+>
+> If that prints an Xcode version, you're set. If it says
+> *"tool 'xcodebuild' requires Xcode, but active developer directory … is a command line tools instance"*,
+> install Xcode from the App Store, open it once to finish setup, then point the command line at it:
+>
+> ```sh
+> sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+> ```
+
 ### From the command line
 
 ```sh
