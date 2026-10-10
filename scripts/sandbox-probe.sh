@@ -71,6 +71,11 @@ checks=(
 # The control must get through these, or the probe isn't really trying.
 must_work_unprotected=" network: open a connection|network: make a web request|network: through a child process|code injection: an injected library ran inside the process "
 
+# Hardened runtime's block on injected libraries is only enforced while System Integrity Protection is on.
+# Some machines (CI runners, some developer Macs) run with it off, where that check can't mean anything.
+sip_on=1
+csrutil status 2>/dev/null | grep -qi 'enabled' || sip_on=0
+
 failures=0
 printf '\n%-58s %-11s %-11s %s\n' "What the probe tried" "Control" "Forecast" "Widget"
 printf '%-58s %-11s %-11s %s\n' "--------------------" "-------" "--------" "------"
@@ -79,6 +84,11 @@ for check in "${checks[@]}"; do
     a=$(status "$WORK/app.txt" "$check")
     w=$(status "$WORK/widget.txt" "$check")
     printf '%-58s %-11s %-11s %s\n' "$check" "$c" "$a" "$w"
+    if [ "$check" = "code injection: an injected library ran inside the process" ] && [ $sip_on = 0 ]; then
+        echo "  (not testable here: System Integrity Protection is off, so macOS doesn't enforce this block."
+        echo "   With SIP on, the default on every Mac, it holds. Run this script on such a Mac to see it.)"
+        continue
+    fi
     for s in "$a" "$w"; do
         if [ "$s" = "ALLOWED" ]; then failures=$((failures + 1)); fi
     done

@@ -118,8 +118,8 @@ CI runs all of this on every push and pull request.
 
 ## Install
 
-You need macOS 14 or later and Xcode 26 or later (free from the App Store). Liquid Glass shows on
-macOS 26; older versions get a frosted fallback. You don't need an Apple developer account.
+**Forecast is for macOS 26 (Tahoe) and later.** Earlier versions of macOS aren't supported or tested.
+To build it you need Xcode 26 or later (free from the App Store). You don't need an Apple developer account.
 
 > **Full Xcode is required. Command Line Tools alone won't work.** Building a widget needs
 > `xcodebuild` and Apple's App Intents tooling, which only ship with the full Xcode app.

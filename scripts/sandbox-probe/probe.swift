@@ -44,7 +44,7 @@ report("files: write to the Desktop", wrote)
 // A child process inherits the sandbox: can it reach the network?
 let curl = Process()
 curl.executableURL = URL(fileURLWithPath: "/usr/bin/curl")
-curl.arguments = ["-s", "-o", "/dev/null", "-m", "5", "-w", "%{http_code}", "http://127.0.0.1:\(port)/"]
+curl.arguments = ["-s", "--noproxy", "*", "-o", "/dev/null", "-m", "5", "-w", "%{http_code}", "http://127.0.0.1:\(port)/"]
 let pipe = Pipe()
 curl.standardOutput = pipe
 curl.standardError = FileHandle.nullDevice

@@ -22,7 +22,7 @@ Especially welcome:
 | Network | No network entitlement. `sandbox-probe.sh` confirms macOS blocks connections, web requests and child processes. |
 | Handing a link to the browser | The audit allows exactly one fixed URL (System Settings) and bans every other way of opening or building one. |
 | Apple Events to other apps | No Apple Events entitlement (audit). `sandbox-probe.sh` confirms macOS blocks sending them. |
-| Code injection | Hardened runtime, no debugger entitlement in Release (audit). `sandbox-probe.sh` confirms injected libraries don't load. |
+| Code injection | Hardened runtime, no debugger entitlement in Release (audit). `sandbox-probe.sh` confirms injected libraries don't load. This depends on System Integrity Protection, which is on by default; on a Mac with SIP turned off, macOS doesn't enforce it (CI runners are such machines, so the probe marks that row as not testable there). |
 | Reading Forecast's data from another app | No shared app-group container. The widget's own container holds only macOS's widget snapshots, which tests show contain no text. |
 | The widget extension | Same entitlements file as the app. The audit checks the built extension, and `sandbox-probe.sh` runs under its entitlements too. |
 
