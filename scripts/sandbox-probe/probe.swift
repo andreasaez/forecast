@@ -45,6 +45,8 @@ report("files: write to the Desktop", wrote)
 let curl = Process()
 curl.executableURL = URL(fileURLWithPath: "/usr/bin/curl")
 curl.arguments = ["-s", "--noproxy", "*", "-o", "/dev/null", "-m", "5", "-w", "%{http_code}", "http://127.0.0.1:\(port)/"]
+// Launch curl without the injected library, or (with SIP off) it would print into curl's output.
+curl.environment = ProcessInfo.processInfo.environment.filter { !$0.key.hasPrefix("DYLD_") }
 let pipe = Pipe()
 curl.standardOutput = pipe
 curl.standardError = FileHandle.nullDevice
